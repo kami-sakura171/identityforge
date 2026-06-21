@@ -1,0 +1,32 @@
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Config secrets
+config/aes-key.txt
+.env
+
+# Logs
+logs/
+
+# Uploaded files
+public/avatars/*
+!public/avatars/.gitkeep
+public/exports/*
+!public/exports/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+db_data/

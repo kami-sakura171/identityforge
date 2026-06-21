@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base-layout}">
+<head><title>自定义字段</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+    <h1 layout:fragment="page-title">自定义字段</h1>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">新建字段（最多 20 个）</div>
+            <form id="fieldForm" onsubmit="createField(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="form-group"><label>字段名</label><input type="text" id="fieldName" class="form-control" required></div>
+                <div class="form-group"><label>显示标签</label><input type="text" id="fieldLabel" class="form-control" required></div>
+                <div class="form-group"><label>类型</label><select id="fieldType" class="form-control" required><option value="TEXT">文本</option><option value="DROPDOWN">下拉框</option><option value="BOOLEAN">布尔值</option></select></div>
+                <div class="form-group"><label>排序</label><input type="number" id="fieldOrder" class="form-control" value="0"></div>
+                <div class="form-group" style="grid-column:1/-1;"><label>必填 <input type="checkbox" id="fieldRequired"></label></div>
+                <button type="submit" class="btn btn-primary">创建字段</button>
+            </form>
+        </div>
+        <div class="card"><div class="card-header">已定义字段</div><div id="fieldsList">加载中...</div></div>
+    </div>
+    <th:block layout:fragment="scripts-extra">
+        <script>
+            document.addEventListener('DOMContentLoaded', loadFields);
+            async function loadFields() {
+                try {
+                    const res = await api.get('/api/admin/custom-fields');
+                    const fields = res.data || [];
+                    document.getElementById('fieldsList').innerHTML = fields.length===0?'<p>暂无自定义字段。</p>':fields.map(f => `<div class="custom-field-row"><div class="field-info"><strong>${escapeHtml(f.name)}</strong> — ${escapeHtml(f.label)} <span class="badge badge-active">${f.fieldType}</span> ${f.isRequired?'<span class="badge badge-locked">必填</span>':''}</div><div class="field-actions"><button class="btn btn-sm btn-danger" onclick="deleteField(${f.id})">删除</button></div></div>`).join('');
+                } catch(e) { Toast.error('加载字段失败'); }
+            }
+            async function createField(event) {
+                event.preventDefault();
+                try { await api.post('/api/admin/custom-fields', { name: document.getElementById('fieldName').value, label: document.getElementById('fieldLabel').value, fieldType: document.getElementById('fieldType').value, displayOrder: parseInt(document.getElementById('fieldOrder').value)||0, isRequired: document.getElementById('fieldRequired').checked }); Toast.success('字段已创建'); loadFields(); document.getElementById('fieldForm').reset(); }
+                catch(e) { Toast.error(e.message); }
+            }
+            async function deleteField(id) { if (!confirm('确定删除该字段？')) return; try { await api.delete(`/api/admin/custom-fields/${id}`); Toast.success('字段已删除'); loadFields(); } catch(e) { Toast.error(e.message); } }
+        </script>
+    </th:block>
+</body>
+</html>

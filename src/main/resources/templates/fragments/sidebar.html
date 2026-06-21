@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+    <aside th:fragment="sidebar" class="sidebar">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <span>身份锻造</span>
+        </div>
+        <nav>
+            <ul>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/dashboard}" data-nav="/customer/dashboard">
+                        📊 工作台
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/profile}" data-nav="/customer/profile">
+                        👤 个人资料
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/avatar}" data-nav="/customer/avatar">
+                        🖼️ 头像管理
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/notifications}" data-nav="/customer/notifications">
+                        🔔 消息通知
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/preferences}" data-nav="/customer/preferences">
+                        ⚙️ 通知偏好
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('CUSTOMER')">
+                    <a th:href="@{/customer/verification}" data-nav="/customer/verification">
+                        ✅ 实名认证
+                    </a>
+                </li>
+
+                <li style="margin:8px 0;border-top:1px solid var(--border-color)"></li>
+
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/dashboard}" data-nav="/admin/dashboard">
+                        📈 管理面板
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/customers}" data-nav="/admin/customers">
+                        👥 用户管理
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/custom-fields}" data-nav="/admin/custom-fields">
+                        📝 自定义字段
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/tos}" data-nav="/admin/tos">
+                        📋 服务条款
+                    </a>
+                </li>
+                <li sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/import}" data-nav="/admin/import">
+                        📥 批量导入
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <script>
+        (function() {
+            var path = window.location.pathname;
+            var links = document.querySelectorAll('.sidebar nav a[data-nav]');
+            links.forEach(function(a) {
+                if (path.startsWith(a.getAttribute('data-nav'))) {
+                    a.classList.add('active');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
