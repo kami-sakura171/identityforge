@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base-layout}">
+<head><title>个人资料</title></head>
+<body>
+    <h1 layout:fragment="page-title">个人资料</h1>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">基本信息</div>
+            <form id="profileForm" onsubmit="updateProfile(event)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="pfUsername" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>显示名称</label>
+                        <input type="text" id="pfDisplayName" name="displayName" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>名</label>
+                        <input type="text" id="pfFirstName" name="firstName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>姓</label>
+                        <input type="text" id="pfLastName" name="lastName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>出生日期 (月/日/年)</label>
+                        <input type="text" id="pfDob" name="dateOfBirth" class="form-control"
+                               pattern="^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/\d{4}$">
+                    </div>
+                    <div class="form-group">
+                        <label>账户状态</label>
+                        <input type="text" id="pfStatus" class="form-control" disabled>
+                    </div>
+                </div>
+                <button type="submit" id="saveProfileBtn" class="btn btn-primary">保存修改</button>
+            </form>
+        </div>
+        <div class="card">
+            <div class="card-header">修改密码</div>
+            <form id="passwordForm" onsubmit="changePassword(event)">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>当前密码</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="10">
+                    </div>
+                </div>
+                <div id="pwError" class="form-error" style="margin-bottom:12px;display:none;"></div>
+                <button type="submit" id="changePwBtn" class="btn btn-primary">修改密码</button>
+            </form>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts-extra">
+        <script>
+            document.addEventListener('DOMContentLoaded', loadProfile);
+            async function loadProfile() {
+                try {
+                    const res = await api.get('/api/customer/profile');
+                    const p = res.data;
+                    document.getElementById('pfUsername').value = p.username || '';
+                    document.getElementById('pfDisplayName').value = p.displayName || '';
+                    document.getElementById('pfFirstName').value = p.firstName || '';
+                    document.getElementById('pfLastName').value = p.lastName || '';
+                    document.getElementById('pfDob').value = p.dateOfBirth || '';
+                    document.getElementById('pfStatus').value = p.accountStatus || '';
+                } catch(e) { Toast.error('加载个人资料失败'); }
+            }
+            async function updateProfile(event) {
+                event.preventDefault();
+                const btn = document.getElementById('saveProfileBtn');
+                setButtonLoading(btn, true);
+                const body = { displayName: document.getElementById('pfDisplayName').value, firstName: document.getElementById('pfFirstName').value, lastName: document.getElementById('pfLastName').value, dateOfBirth: document.getElementById('pfDob').value };
+                try { await api.put('/api/customer/profile', body); Toast.success('资料已更新'); }
+                catch(e) { Toast.error(e.message || '更新失败'); }
+                finally { setButtonLoading(btn, false); }
+            }
+            async function changePassword(event) {
+                event.preventDefault();
+                const btn = document.getElementById('changePwBtn');
+                const errorEl = document.getElementById('pwError');
+                setButtonLoading(btn, true); errorEl.style.display = 'none';
+                try {
+                    await api.put('/api/customer/password', { currentPassword: document.getElementById('currentPassword').value, newPassword: document.getElementById('newPassword').value });
+                    Toast.success('密码修改成功'); document.getElementById('passwordForm').reset();
+                } catch(e) { errorEl.textContent = e.message; errorEl.style.display = 'block'; }
+                finally { setButtonLoading(btn, false); }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base-layout}">
+<head><title>我的工作台</title></head>
+<body>
+    <h1 layout:fragment="page-title">我的工作台</h1>
+    <div layout:fragment="content">
+        <div class="card">
+            <div class="card-header">欢迎</div>
+            <p>欢迎使用身份锻造！在这里您可以管理个人资料、消息通知和实名认证。</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="notifCount">-</div>
+                <div class="stat-label">未读通知</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="roleDisplay">-</div>
+                <div class="stat-label">当前角色</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="verifStatus">-</div>
+                <div class="stat-label">认证状态</div>
+            </div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts-extra">
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const [profileRes, notifRes] = await Promise.all([
+                        api.get('/api/customer/profile'),
+                        api.get('/api/customer/notifications/unread-count')
+                    ]);
+                    const p = profileRes.data;
+                    document.getElementById('roleDisplay').textContent = p?.contextualRole || '标准用户';
+                    document.getElementById('verifStatus').textContent = p?.verification?.status || '未提交';
+                    document.getElementById('notifCount').textContent = notifRes.data?.unreadCount || 0;
+                } catch(e) { console.error(e); }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

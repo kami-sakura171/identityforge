@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base-layout}">
+<head><title>管理面板</title><link rel="stylesheet" th:href="@{/css/admin.css}"></head>
+<body>
+    <h1 layout:fragment="page-title">管理面板</h1>
+    <div layout:fragment="content">
+        <div id="alertBanner" class="alert-banner" style="display:none;"></div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalUsers">-</div><div class="stat-label">总用户数</div></div>
+            <div class="stat-card"><div class="stat-value" id="activeSessions">-</div><div class="stat-label">活跃会话</div></div>
+            <div class="stat-card"><div class="stat-value" id="lockedAccounts">-</div><div class="stat-label">锁定账户</div></div>
+        </div>
+        <div class="card">
+            <div class="card-header">近 30 天注册趋势</div>
+            <div class="chart-container"><canvas id="registrationTrendChart"></canvas></div>
+        </div>
+    </div>
+    <th:block layout:fragment="scripts-extra">
+        <script th:src="@{/js/lib/chart.min.js}"></script>
+        <script th:src="@{/js/chart.js}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const res = await api.get('/api/admin/dashboard');
+                    const d = res.data;
+                    document.getElementById('totalUsers').textContent = d.totalUsers;
+                    document.getElementById('activeSessions').textContent = d.activeSessions;
+                    document.getElementById('lockedAccounts').textContent = d.lockedAccounts;
+                    if (d.securityAlert?.active) {
+                        const banner = document.getElementById('alertBanner');
+                        banner.textContent = '🚨 ' + d.securityAlert.message; banner.style.display = 'flex';
+                    }
+                } catch(e) { Toast.error('加载面板数据失败'); }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

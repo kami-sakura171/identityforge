@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base-layout}">
+<head><title>消息通知</title></head>
+<body>
+    <h1 layout:fragment="page-title">消息通知</h1>
+    <div layout:fragment="content">
+        <div class="card"><div id="notifList" style="padding:0;"></div></div>
+    </div>
+    <th:block layout:fragment="scripts-extra">
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const res = await api.get('/api/customer/notifications?page=0&size=100');
+                    const notifs = res.data?.content || [];
+                    const container = document.getElementById('notifList');
+                    if (notifs.length === 0) {
+                        container.innerHTML = '<div style="padding:24px;text-align:center;">暂无通知</div>';
+                        return;
+                    }
+                    container.innerHTML = notifs.map(n => `<div class="notification-item ${n.isRead?'':'unread'}"><strong>${escapeHtml(n.title)}</strong><p style="margin:4px 0;">${escapeHtml(n.message)}</p><div style="font-size:0.75rem;color:var(--text-secondary);">${formatTimeAgo(n.createdAt)}</div></div>`).join('');
+                } catch(e) { Toast.error('加载通知失败'); }
+            });
+        </script>
+    </th:block>
+</body>
+</html>

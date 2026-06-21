@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="scripts">
+        <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/js/main.js}"></script>
+        <script th:src="@{/js/notification.js}"></script>
+        <script>
+            async function logout() {
+                try { await api.post('/api/auth/logout'); } catch(e) {}
+                clearTokens();
+                window.location.href = '/login';
+            }
+            async function markAllRead() {
+                await api.put('/api/customer/notifications/read-all');
+                loadNotifications();
+                pollUnreadCount();
+            }
+        </script>
+    </div>
+</body>
+</html>
